@@ -2,7 +2,7 @@
     "displayName": "Mars Surface Images",
     "name": "mars-surface-images",
     "description": "Surface images of Mars taken by the HiRISE camera on the Mars Reconnaissance Orbiter. HiRISE investigate deposits and landforms resulting from geologic and climatic processes and assists in the evaluation of candidate landing sites.",
-    "scope": "project",
+    "scope": "public",
     "version": "0.0.1",
     "codebase": {
       "type": "git",
