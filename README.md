@@ -1,7 +1,8 @@
 # Dataset and Feature Vectors Loader
 
-This dataset adapter is designed to facilitate the installation of 
-The installation also creates 3 trained models with metrics.
+This dataset adapter is designed to facilitate the installation of the Mars Surface Images datasets, 
+one with raw unannotated images and another with captioned images.
+
 
 ## Installation
 
@@ -12,6 +13,6 @@ The installation also creates 3 trained models with metrics.
 
 ## Components
 
-1. Annotated Dataset - V2 Plant Seedlings Dataset
-2. Unannotated Dataset - V2 Plant Seedlings Dataset
+1. Annotated Dataset - Mars Surface Images with Captions
+2. Unannotated Dataset - Mars Surface Images Unannotated
 3. Recipe and Ontology - dummy labels for model training
