@@ -1,0 +1,86 @@
+{
+    "displayName": "Mars Surface Images",
+    "name": "mars-surface-images",
+    "description": "Surface images of Mars taken by the HiRISE camera on the Mars Reconnaissance Orbiter. HiRISE investigate deposits and landforms resulting from geologic and climatic processes and assists in the evaluation of candidate landing sites.",
+    "scope": "project",
+    "version": "0.0.1",
+    "codebase": {
+      "type": "git",
+      "gitUrl": "https://github.com/dataloop-ai-apps/mars-surface-datasets",
+      "gitTag": "0.0.1"
+    },
+    "attributes": {
+      "Category": "Dataset",
+      "Hub": "Dataloop",
+      "Media Type": ["Image", "Multi Modal"],
+      "Annotation Type": ["Other"],
+      "License": "CC0: Public Domain"
+    },
+    "components": {
+      "computeConfigs": [
+        {
+          "name": "dataset-deploy",
+          "runtime": {
+            "podType": "regular-xs",
+            "concurrency": 10,
+            "autoscaler": {
+              "type": "rabbitmq",
+              "minReplicas": 0,
+              "maxReplicas": 1,
+              "queueLength": 100
+            }
+          }
+        }
+      ],
+      "modules": [
+        {
+          "name": "dataset-loader",
+          "entryPoint": "loader.py",
+          "className": "DatasetLoader",
+          "computeConfig": "dataset-deploy",
+          "description": "Dataset Loader for Dataset from Zip",
+          "initInputs": [],
+          "functions": [
+            {
+              "name": "load_unannotated",
+              "input": [
+                {
+                  "type": "Dataset",
+                  "name": "dataset",
+                  "description": "Dataloop Dataset Entity"
+                },
+                {
+                  "type": "String",
+                  "name": "source",
+                  "description": "Dataset source URL"
+                }
+              ],
+              "output": [],
+              "displayName": "load_unannotated",
+              "displayIcon": "",
+              "description": "function to load unannotated dataset from zip file"
+            }
+          ]
+        }
+      ],
+      "datasets": [
+        {
+          "name": "Mars Surface Images with Captions",
+          "docs": "https://www.kaggle.com/datasets/markmbaum/mars-surface-images",
+          "source": "https://storage.googleapis.com/model-mgmt-snapshots/datasets_mars_surface_captioning/mars_surface_captioned.zip",
+          "invoke": {
+            "namespace": "dataset-loader.load_unannotated"
+          }
+        },
+        {
+          "name": "Mars Surface Images Unannotated",
+          "docs": "https://www.kaggle.com/datasets/markmbaum/mars-surface-images",
+          "source": "https://storage.googleapis.com/model-mgmt-snapshots/datasets_mars_surface_captioning/mars_surface_uncaptioned.zip",
+          "invoke": {
+            "namespace": "dataset-loader.load_unannotated"
+          }
+        }
+      ]
+    }
+  }
+  
