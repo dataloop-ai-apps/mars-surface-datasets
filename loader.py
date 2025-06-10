@@ -1,8 +1,7 @@
 import os
 import json
+import time
 import urllib
-import random
-import string
 import logging
 import pathlib
 import zipfile
@@ -60,15 +59,24 @@ class DatasetLoader(dl.BaseServiceRunner):
         annotation_jsons = sorted(list(pathlib.Path(annotation_jsons_folder_path).rglob('*.json')))
 
         try:
-            feature_set = dataset.project.feature_sets.create(
-                name="openai-clip", size=512, entity_type="item", set_type="vector"
-            )
+            for attempt in range(3):
+                try:
+                    feature_set = dataset.project.feature_sets.create(
+                        name="openai-clip", size=512, entity_type="item", set_type="clip"
+                    )
+                    logger.info("Creating new feature set for openai-clip")
+                    break
+                except dl.exceptions.BadRequest:  # When feature set already exists
+                    feature_set = dataset.project.feature_sets.get(feature_set_name="openai-clip")
+                    break
+                except Exception as e:
+                    if attempt == 2:  # Last attempt
+                        logger.error(f"Failed to create or get feature set after 3 attempts: {str(e)}")
+                        raise
+                    logger.warning(f"Attempt {attempt + 1} failed, retrying... Error: {str(e)}")
+                    time.sleep(1)  # Wait before retrying
         except Exception as e:
-            logger.info("Feature set already exists, creating a new feature set with random suffix")
-            random_suffix = ''.join(random.choices(string.ascii_letters + string.digits, k=5))
-            feature_set = dataset.project.feature_sets.create(
-                name=f"openai-clip-{random_suffix}", size=512, entity_type="item", set_type="vector"
-            )
+            raise ValueError(f"Failed to create or get feature set after 3 attempts: {str(e)}")
 
         def process_item(args):
             item_file, annotation_file, dataset, feature_set = args
@@ -76,11 +84,13 @@ class DatasetLoader(dl.BaseServiceRunner):
             with open(annotation_file, 'r') as f:
                 annotation_data = json.load(f)
 
-            # Extract tags
+            # Extract description, tags and user metadata
             item_metadata = dict()
+            item_metadata["user"] = annotation_data.get("metadata", dict()).get("user", dict())
             tags_metadata = annotation_data.get("metadata", dict()).get("system", dict()).get('tags', None)
             if tags_metadata is not None:
                 item_metadata.update({"system": {"tags": tags_metadata}})
+            caption = annotation_data.get("description", None)
 
             # Get features
             features = annotation_data.get('itemVectors', [])
@@ -88,7 +98,7 @@ class DatasetLoader(dl.BaseServiceRunner):
 
             # Construct item remote path
             remote_path = f"/{item_file.parent.stem}"
-            item = dataset.items.upload(local_path=str(item_file), remote_path=remote_path, item_metadata=item_metadata)
+            item = dataset.items.upload(local_path=str(item_file), remote_path=remote_path, item_metadata=item_metadata, item_description=caption)
             item.features.create(
                 value=feature["value"], project_id=dataset.project.id, feature_set_id=feature_set.id, entity=item
             )
@@ -106,13 +116,12 @@ class DatasetLoader(dl.BaseServiceRunner):
 
 
 if __name__ == "__main__":
-    import time
-
-    project = dl.projects.get(project_id='9f04ed29-2fbd-497e-b038-43f34b965c40')
+    project = dl.projects.create(project_name=f"TEST mars surface {time.time()}")
     test_dataset = project.datasets.create(dataset_name=f"TEST mars surface {time.time()}")
     DatasetLoader().load_unannotated(
         progress=dl.Progress(),
         dataset=test_dataset,
-        source="https://storage.googleapis.com/model-mgmt-snapshots/datasets_mars_surface_captioning/mars_surface_uncaptioned.zip",
+        source="https://storage.googleapis.com/model-mgmt-snapshots/datasets_mars_surface_captioning/mars_surface_captioned.zip",
     )
     test_dataset.delete(sure=True, really=True)
+    project.delete(sure=True, really=True)
