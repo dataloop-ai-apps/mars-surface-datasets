@@ -67,7 +67,7 @@
         {
           "name": "Mars Surface Images with Captions",
           "docs": "https://www.kaggle.com/datasets/markmbaum/mars-surface-images",
-          "source": "https://www.kaggle.com/datasets/markmbaum/mars-surface-images",
+          "source": "https://storage.googleapis.com/model-mgmt-snapshots/datasets_mars_surface_captioning/mars_surface_captioned.zip",
           "invoke": {
             "namespace": "dataset-loader.load_unannotated"
           }
@@ -75,7 +75,7 @@
         {
           "name": "Mars Surface Images Unannotated",
           "docs": "https://www.kaggle.com/datasets/markmbaum/mars-surface-images",
-          "source": "https://www.kaggle.com/datasets/markmbaum/mars-surface-images",
+          "source": "https://storage.googleapis.com/model-mgmt-snapshots/datasets_mars_surface_captioning/mars_surface_uncaptioned.zip",
           "invoke": {
             "namespace": "dataset-loader.load_unannotated"
           }

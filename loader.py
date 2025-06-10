@@ -6,10 +6,7 @@ import string
 import logging
 import pathlib
 import zipfile
-import tempfile
-import numpy as np
 import dtlpy as dl
-import pandas as pd
 
 from tqdm import tqdm
 from urllib.request import urlretrieve
@@ -112,10 +109,10 @@ if __name__ == "__main__":
     import time
 
     project = dl.projects.get(project_id='9f04ed29-2fbd-497e-b038-43f34b965c40')
-    dataset = project.datasets.create(dataset_name=f"TEST mars surface {time.time()}")
+    test_dataset = project.datasets.create(dataset_name=f"TEST mars surface {time.time()}")
     DatasetLoader().load_unannotated(
         progress=dl.Progress(),
-        dataset=dataset,
+        dataset=test_dataset,
         source="https://storage.googleapis.com/model-mgmt-snapshots/datasets_mars_surface_captioning/mars_surface_uncaptioned.zip",
     )
-    dataset.delete(sure=True, really=True)
+    test_dataset.delete(sure=True, really=True)
